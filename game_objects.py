@@ -20,7 +20,7 @@ class GameObject:
         pass
 
     def check_event(self, event):
-        if event.type in (pygame.KEYDOWN, pygame.KEYUP, pygame.MOUSEBUTTONUP, pygame.MOUSEBUTTONDOWN):
+        if event.type in (pygame.MOUSEBUTTONUP, pygame.MOUSEBUTTONDOWN):
             return self.rect.collidepoint(*event.pos)
 
 
@@ -97,7 +97,7 @@ class Grid(GameObject):
         self.dys = self.dy // num_of_cell[0]
         self.dxs = self.dx // num_of_cell[1]
 
-        self.grid = [[GameObject() for j in range(num_of_cell[1])] for _ in range(num_of_cell[0])]
+        self.grid = [[GameObject() for _ in range(num_of_cell[1])] for _ in range(num_of_cell[0])]
 
         self.rect = pygame.Rect(pos, (size_of_cell * num_of_cell[0] + width, size_of_cell * num_of_cell[1] + width))
 
@@ -157,7 +157,7 @@ class TicTacToeGrid(Grid):
                  color=(255, 255, 255), scene=None):
         super().__init__(pos, size_of_cell, num_of_cell, width, color, scene)
 
-        self.grid = [[GameUnit() for j in range(self.cells_count[1])] for _ in range(self.cells_count[0])]
+        self.grid = [[GameUnit() for _ in range(self.cells_count[1])] for _ in range(self.cells_count[0])]
 
         self.__n_char = 0
         self.__chars = (Cross, Circle)
@@ -232,11 +232,11 @@ class TicTacToeGrid(Grid):
             but, pos = event.button, event.pos
             if but == 1:
                 coords = self.get_ceil_pos(*pos)
-                Char = self.char
+                char = self.char
 
                 pos = self.get_centre(*coords)
 
-                if self.edit(*coords, Char(pos, self.unit_settings['size'], self.unit_settings['width'],
+                if self.edit(*coords, char(pos, self.unit_settings['size'], self.unit_settings['width'],
                                            self.unit_settings['color'])):
                     self.__n_char = not self.__n_char
                     ans = self.check_win()
