@@ -24,9 +24,7 @@ running = True
 while running:
     clock.tick(FPS)
     screen.fill(BLACK)
-    # Ввод процесса (события)
     for event in pygame.event.get():
-        # check for closing window
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
