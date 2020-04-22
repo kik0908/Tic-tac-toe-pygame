@@ -1,23 +1,36 @@
 from math import ceil
-from typing import Tuple
+from typing import Tuple, Dict
 
 import pygame
 
 
 class GameObject:
+    def __init__(self, rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)):
+        self.rect = rect
+
     def update(self):
         pass
 
     def render(self, display):
         pass
 
+    def click(self, but, pos):
+        pass
+
+    def check_click(self, pos):
+        return self.rect.collidepoint(*pos)
+
 
 class GameUnit(GameObject):
-    pass
+    def __init__(self, kind=None):
+        super().__init__()
+        self.value = kind
 
 
-class Cross(GameObject):
+class Cross(GameUnit):
     def __init__(self, pos: Tuple[int, int], size: int, width=3, color=(255, 255, 255)):
+        super().__init__('x')
+
         self.pos = pos
         self.size = size
 
@@ -27,6 +40,8 @@ class Cross(GameObject):
         self.start_pos1 = (pos[0] - size, pos[1] - size)
         self.end_pos1 = (pos[0] + size, pos[1] + size)
 
+        self.rect = pygame.Rect(self.start_pos1, (size * 2 + width, size * 2 + width))
+
         self.start_pos2 = (pos[0] - size, 2 * size + pos[1] - size)
         self.end_pos2 = (2 * size + pos[0] - size, pos[1] - size)
 
@@ -35,10 +50,14 @@ class Cross(GameObject):
         pygame.draw.line(display, self.color, self.start_pos2, self.end_pos2, self.width)
 
 
-class Circle(GameObject):
+class Circle(GameUnit):
     def __init__(self, pos: Tuple[int, int], size: int, width=3, color=(255, 255, 255)):
+        super().__init__('o')
+
         self.pos = pos
         self.size = size
+
+        self.rect = pygame.Rect(pos[0] - size, pos[1] - size, size * 2 + width, size * 2 + width)
 
         self.width = width
         self.color = color
@@ -50,6 +69,8 @@ class Circle(GameObject):
 class Grid(GameObject):
     def __init__(self, pos: Tuple[int, int], size_of_cell: int, num_of_cell: Tuple[int, int], width=3,
                  color=(255, 255, 255)):
+        super().__init__()
+
         self.pos = pos
         self.cells_size = size_of_cell
         self.cells_count = num_of_cell
@@ -64,6 +85,8 @@ class Grid(GameObject):
         self.dxs = self.dx // num_of_cell[1]
 
         self.grid = [[GameObject() for j in range(num_of_cell[1])] for _ in range(num_of_cell[0])]
+
+        self.rect = pygame.Rect(pos, (size_of_cell * num_of_cell[0] + width, size_of_cell * num_of_cell[1] + width))
 
     def render(self, display):
         pygame.draw.lines(display, self.color, True,
@@ -116,13 +139,73 @@ class Grid(GameObject):
 
 
 class TicTacToeGrid(Grid):
-    win_pos = None
+    def __init__(self, pos: Tuple[int, int], size_of_cell: int, num_of_cell: Tuple[int, int], width=3,
+                 color=(255, 255, 255)):
+        super().__init__(pos, size_of_cell, num_of_cell, width, color)
 
+        self.grid = [[GameUnit() for j in range(self.cells_count[1])] for _ in range(self.cells_count[0])]
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        self.__n_char = 0
+        self.__chars = (Cross, Circle)
 
+        self.unit_settings = {'width': width, 'color': color, 'size': round(size_of_cell * 40 / 100)}
 
+    def set_unit_settings(self, settings: Dict):
+        self.unit_settings = settings
 
     def check_win(self):
-        pass
+        ans_x = [[], []]
+        ans_o = [[], []]
+        for i in range(self.cells_count[0]):
+            ans_x[0].append(self.grid[i][i].value == 'x')
+            ans_o[0].append(self.grid[i][i].value == 'o')
+
+            ans_x[1].append(self.grid[self.cells_count[0] - i - 1][i].value == 'x')
+            ans_o[1].append(self.grid[self.cells_count[0] - i - 1][i].value == 'o')
+        if any(map(lambda x: all(x), ans_x)):
+            return 'x'
+        elif any(map(lambda x: all(x), ans_o)):
+            return 'o'
+
+        ans_x = []
+        ans_o = []
+        for i in self.grid:
+            ans_x.append(all(map(lambda x: x.value == 'x', i)))
+            ans_o.append(all(map(lambda x: x.value == 'o', i)))
+        if any(ans_x):
+            return 'x'
+        elif any(ans_o):
+            return 'o'
+
+        ans_x = []
+        ans_o = []
+        for i in range(self.cells_count[1]):
+            _1, _2 = [], []
+            for j in range(self.cells_count[0]):
+                _1.append(self.grid[j][i].value == 'x')
+                _2.append(self.grid[j][i].value == 'o')
+
+            ans_x.append(all(_1))
+            ans_o.append(all(_2))
+        if any(ans_x):
+            return 'x'
+        elif any(ans_o):
+            return 'o'
+
+    @property
+    def char(self):
+        return self.__chars[self.__n_char]
+
+    def click(self, but, pos):
+        if but == 1:
+            coords = self.get_ceil_pos(*pos)
+            Char = self.char
+
+            pos = self.get_centre(*coords)
+
+            self.edit(*coords,
+                      Char(pos, self.unit_settings['size'], self.unit_settings['width'],
+                                    self.unit_settings['color']))
+
+            self.__n_char = not self.__n_char
+

@@ -23,6 +23,7 @@ class SceneManager:
 class Scene:
     def __init__(self, display):
         self.display = display
+        self.objects = []
 
     def update(self):
         pass
@@ -34,4 +35,13 @@ class Scene:
 class MainGame(Scene):
     def __init__(self, display):
         super().__init__(display)
+
+    def handling_events(self, events):
+        for event in events:
+            if event.type == pygame.QUIT:
+                exit(0)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+
+
 
