@@ -5,8 +5,10 @@ import pygame
 
 
 class GameObject:
-    def __init__(self, rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)):
+    def __init__(self, scene=None, rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)):
         self.rect = rect
+
+        self.scene = scene
 
     def update(self):
         pass
@@ -14,22 +16,33 @@ class GameObject:
     def render(self, display):
         pass
 
-    def click(self, but, pos):
+    def click(self, event):
         pass
 
-    def check_click(self, pos):
-        return self.rect.collidepoint(*pos)
+    def check_event(self, event):
+        if event.type in (pygame.KEYDOWN, pygame.KEYUP, pygame.MOUSEBUTTONUP, pygame.MOUSEBUTTONDOWN):
+            return self.rect.collidepoint(*event.pos)
 
 
 class GameUnit(GameObject):
-    def __init__(self, kind=None):
-        super().__init__()
+    def __init__(self, kind=None, scene=None):
+        super().__init__(scene)
         self.value = kind
+
+    def __eq__(self, other):
+        if type(other) == type(self):
+            return True
+        return False
+
+    def __ne__(self, other):
+        if type(other) != type(self):
+            return True
+        return False
 
 
 class Cross(GameUnit):
-    def __init__(self, pos: Tuple[int, int], size: int, width=3, color=(255, 255, 255)):
-        super().__init__('x')
+    def __init__(self, pos: Tuple[int, int], size: int, width=3, color=(255, 255, 255), scene=None):
+        super().__init__('x', scene)
 
         self.pos = pos
         self.size = size
@@ -51,8 +64,8 @@ class Cross(GameUnit):
 
 
 class Circle(GameUnit):
-    def __init__(self, pos: Tuple[int, int], size: int, width=3, color=(255, 255, 255)):
-        super().__init__('o')
+    def __init__(self, pos: Tuple[int, int], size: int, width=3, color=(255, 255, 255), scene=None):
+        super().__init__('o', scene)
 
         self.pos = pos
         self.size = size
@@ -68,8 +81,8 @@ class Circle(GameUnit):
 
 class Grid(GameObject):
     def __init__(self, pos: Tuple[int, int], size_of_cell: int, num_of_cell: Tuple[int, int], width=3,
-                 color=(255, 255, 255)):
-        super().__init__()
+                 color=(255, 255, 255), scene=None):
+        super().__init__(scene)
 
         self.pos = pos
         self.cells_size = size_of_cell
@@ -130,7 +143,8 @@ class Grid(GameObject):
             return None
 
     def edit(self, x: int, y: int, obj: GameObject):
-        self.grid[y][x] = obj
+        self.grid[x][y] = obj
+        return True
 
     def get_centre(self, x: int, y: int):
         a = self.pos[0] + self.cells_size * (x + 1) - round(self.cells_size / 2)
@@ -140,8 +154,8 @@ class Grid(GameObject):
 
 class TicTacToeGrid(Grid):
     def __init__(self, pos: Tuple[int, int], size_of_cell: int, num_of_cell: Tuple[int, int], width=3,
-                 color=(255, 255, 255)):
-        super().__init__(pos, size_of_cell, num_of_cell, width, color)
+                 color=(255, 255, 255), scene=None):
+        super().__init__(pos, size_of_cell, num_of_cell, width, color, scene)
 
         self.grid = [[GameUnit() for j in range(self.cells_count[1])] for _ in range(self.cells_count[0])]
 
@@ -152,6 +166,14 @@ class TicTacToeGrid(Grid):
 
     def set_unit_settings(self, settings: Dict):
         self.unit_settings = settings
+
+    def edit(self, x, y, obj):
+        if self.grid[x][y] == GameUnit():
+            super().edit(x, y, obj)
+            return True
+        return False
+
+        # return super().edit(x, y, obj)
 
     def check_win(self):
         ans_x = [[], []]
@@ -192,20 +214,31 @@ class TicTacToeGrid(Grid):
         elif any(ans_o):
             return 'o'
 
+        _c = 0
+        for i in self.grid:
+            for j in i:
+                if j != GameUnit():
+                    _c += 1
+        if _c == self.cells_count[0] * self.cells_count[1]:
+            print('123421')
+            return 'b'
+
     @property
     def char(self):
         return self.__chars[self.__n_char]
 
-    def click(self, but, pos):
-        if but == 1:
-            coords = self.get_ceil_pos(*pos)
-            Char = self.char
+    def click(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            but, pos = event.button, event.pos
+            if but == 1:
+                coords = self.get_ceil_pos(*pos)
+                Char = self.char
 
-            pos = self.get_centre(*coords)
+                pos = self.get_centre(*coords)
 
-            self.edit(*coords,
-                      Char(pos, self.unit_settings['size'], self.unit_settings['width'],
-                                    self.unit_settings['color']))
-
-            self.__n_char = not self.__n_char
-
+                if self.edit(*coords, Char(pos, self.unit_settings['size'], self.unit_settings['width'],
+                                           self.unit_settings['color'])):
+                    self.__n_char = not self.__n_char
+                    ans = self.check_win()
+                    if ans is not None:
+                        self.scene.callback('player_win', {'char': ans})
