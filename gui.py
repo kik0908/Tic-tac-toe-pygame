@@ -28,6 +28,51 @@ class BaseGUIObject:
         pass
 
 
+class TextInput(BaseGUIObject):
+    def __init__(self, pos: Tuple[int, int, Optional[int], Optional[int]], height, width, scene, passive_state,
+                 active_state=None, name=''):
+        self.pos = pos[0:2]
+        self.offset = pos[2:] if len(pos) == 4 else [0, 0]
+        self.size = (height, width)
+        self.passive_state = passive_state
+        self.state = 0
+        self.active_state = active_state if active_state is not None else passive_state
+
+        super().__init__(scene, pygame.Rect(self.pos, (width, height)), name)
+
+        self.rect_for_check = self.rect.copy()
+        self.rect_for_check.left += self.offset[0]
+        self.rect_for_check.top += self.offset[1]
+
+        self.text = []
+        self.size_text = height - 4
+        self.char_count = width//self.size_text ####### добавть смещение текста 
+
+        self.surface = pygame.Surface((width, height))
+
+    def render(self, display):
+
+        if self.state == 0:
+            settings = self.passive_state
+        else:
+            settings = self.active_state
+
+        self.surface.fill(settings['color'])
+        _ = pygame.Rect(*(0, 0), *reversed(self.size))
+        pygame.draw.rect(self.surface, self.passive_state['color'], _)
+
+        if settings['bd_width'] >= 1:
+            pygame.draw.rect(self.surface, settings['bd_color'], _, settings['bd_width'])
+
+        font = pygame.font.match_font('arial')
+        font = pygame.font.Font(font, self.size_text)
+        text_surface = font.render(''.join(self.text), True, (255, 255, 255))
+        text_rect = text_surface.get_rect()
+        self.surface.blit(text_surface, (self.size_text * len(self.text) + 2, 0))
+
+        display.blit(self.surface, (self.pos[0], self.pos[1] - 2))
+
+
 class Label(BaseGUIObject):
     def __init__(self, pos: Tuple[int, int], width, height, text: Dict, scene, passive_state, align='center', name=''):
         self.pos = pos[0:2]

@@ -2,7 +2,7 @@ import pygame
 
 import scenes
 from game_objects import Cross, Circle, Grid, TicTacToeGrid
-from gui import Button, Label
+from gui import Button, Label, TextInput
 
 WIDTH = 302
 HEIGHT = 357
@@ -35,6 +35,8 @@ def draw_text(surf, text, size, x, y):
 scene_manager = scenes.SceneManager(screen)
 scene_manager.new_scene(scenes.MainMenu(screen, scene_manager))
 
+te = TextInput((100, 200), 30, 100, scene_manager.scene, {'color': (123, 18, 76), 'bd_color': (255, 255, 255), 'bd_width': 1})
+te.text = list('123asd asddf1')
 
 running = True
 while running:
@@ -43,6 +45,8 @@ while running:
 
     aa = pygame.event.get()
     scene_manager.next_step(aa)
+
+    te.render(screen)
 
     pygame.display.flip()
 
