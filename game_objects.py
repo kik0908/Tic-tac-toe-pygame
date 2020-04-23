@@ -5,9 +5,9 @@ import pygame
 
 
 class GameObject:
-    def __init__(self, scene=None, rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)):
+    def __init__(self, scene=None, rect: pygame.Rect = pygame.Rect(0, 0, 0, 0), name=''):
         self.rect = rect
-
+        self.name = name
         self.scene = scene
 
     def update(self):
@@ -25,8 +25,8 @@ class GameObject:
 
 
 class GameUnit(GameObject):
-    def __init__(self, kind=None, scene=None):
-        super().__init__(scene)
+    def __init__(self, kind=None, scene=None, name=''):
+        super().__init__(scene, name=name)
         self.value = kind
 
     def __eq__(self, other):
@@ -41,8 +41,8 @@ class GameUnit(GameObject):
 
 
 class Cross(GameUnit):
-    def __init__(self, pos: Tuple[int, int], size: int, width=3, color=(255, 255, 255), scene=None):
-        super().__init__('x', scene)
+    def __init__(self, pos: Tuple[int, int], size: int, width=3, color=(255, 255, 255), scene=None, name=''):
+        super().__init__('x', scene, name=name)
 
         self.pos = pos
         self.size = size
@@ -64,8 +64,8 @@ class Cross(GameUnit):
 
 
 class Circle(GameUnit):
-    def __init__(self, pos: Tuple[int, int], size: int, width=3, color=(255, 255, 255), scene=None):
-        super().__init__('o', scene)
+    def __init__(self, pos: Tuple[int, int], size: int, width=3, color=(255, 255, 255), scene=None, name=''):
+        super().__init__('o', scene, name=name)
 
         self.pos = pos
         self.size = size
@@ -81,8 +81,8 @@ class Circle(GameUnit):
 
 class Grid(GameObject):
     def __init__(self, pos: Tuple[int, int], size_of_cell: int, num_of_cell: Tuple[int, int], width=3,
-                 color=(255, 255, 255), scene=None):
-        super().__init__(scene)
+                 color=(255, 255, 255), scene=None, name=''):
+        super().__init__(scene, name=name)
 
         self.pos = pos
         self.cells_size = size_of_cell
@@ -154,8 +154,8 @@ class Grid(GameObject):
 
 class TicTacToeGrid(Grid):
     def __init__(self, pos: Tuple[int, int], size_of_cell: int, num_of_cell: Tuple[int, int], width=3,
-                 color=(255, 255, 255), scene=None):
-        super().__init__(pos, size_of_cell, num_of_cell, width, color, scene)
+                 color=(255, 255, 255), scene=None, name=''):
+        super().__init__(pos, size_of_cell, num_of_cell, width, color, scene, name)
 
         self.grid = [[GameUnit() for _ in range(self.cells_count[1])] for _ in range(self.cells_count[0])]
 
@@ -163,6 +163,8 @@ class TicTacToeGrid(Grid):
         self.__chars = (Cross, Circle)
 
         self.unit_settings = {'width': width, 'color': color, 'size': round(size_of_cell * 40 / 100)}
+
+        self.ans = None
 
     def set_unit_settings(self, settings: Dict):
         self.unit_settings = settings
@@ -220,12 +222,15 @@ class TicTacToeGrid(Grid):
                 if j != GameUnit():
                     _c += 1
         if _c == self.cells_count[0] * self.cells_count[1]:
-            print('123421')
             return 'b'
 
     @property
     def char(self):
         return self.__chars[self.__n_char]
+
+    def update(self):
+        if self.ans is not None:
+            self.scene.callback('player_win', {'char': self.ans})
 
     def click(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -239,6 +244,5 @@ class TicTacToeGrid(Grid):
                 if self.edit(*coords, char(pos, self.unit_settings['size'], self.unit_settings['width'],
                                            self.unit_settings['color'])):
                     self.__n_char = not self.__n_char
-                    ans = self.check_win()
-                    if ans is not None:
-                        self.scene.callback('player_win', {'char': ans})
+                    self.scene.callback('change_player')
+                    self.ans = self.check_win()

@@ -2,10 +2,10 @@ import pygame
 
 import scenes
 from game_objects import Cross, Circle, Grid, TicTacToeGrid
-from gui import Button
+from gui import Button, Label
 
-WIDTH = 500
-HEIGHT = 500
+WIDTH = 302
+HEIGHT = 357
 FPS = 60
 
 WHITE = (255, 255, 255)
@@ -33,11 +33,8 @@ def draw_text(surf, text, size, x, y):
 
 
 scene_manager = scenes.SceneManager(screen)
-scene_manager.new_scene(scenes.MainGame(screen, scene_manager))
+scene_manager.new_scene(scenes.MainMenu(screen, scene_manager))
 
-but = Button((450, 450), 22, 48, {'text': 'Test', 'size': 20, 'color': GREEN}, lambda: print('1'), scene_manager.scene,
-             {'color': (0, 0, 0), 'bd_color': BLUE, 'bd_width': 1},
-             {'color': (78, 0, 23), 'bd_color': BLUE, 'bd_width': 4})
 
 running = True
 while running:
@@ -46,9 +43,7 @@ while running:
 
     aa = pygame.event.get()
     scene_manager.next_step(aa)
-    but.render(screen)
-    for i in aa:
-        but.check_event(i)
+
     pygame.display.flip()
 
 pygame.quit()
