@@ -131,27 +131,27 @@ class MainMenu(Scene):
                                        {'color': (0, 0, 0), 'bd_color': (255, 255, 255), 'bd_width': -1},
                                        {'color': (40, 40, 40), 'bd_color': (255, 255, 255), 'bd_width': 1}))
 
-        self.objects.append(gui.Button((90, 150), 26, 120, "Test", lambda: self.scene_manager.new_scene(
-            EndGame(pygame.Surface((300, 120)), self.scene_manager), True, (1, 130)), self,
-                                       {'color': (0, 0, 0), 'bd_color': (255, 255, 255), 'bd_width': -1},
-                                       {'color': (40, 40, 40), 'bd_color': (255, 255, 255), 'bd_width': 1}))
-
 
 class EndGame(Scene):
-    def __init__(self, display, scene_manager):
+    def __init__(self, display, scene_manager, side):
         super().__init__(display, scene_manager)
+
+        self.side = side
 
         self.top = display.get_size()[1] / 2
         self.center = display.get_size()[0] / 2
 
     def set_offset(self, x, y):
-        self.objects.append(gui.Button((self.center - 100 - 2, self.top - 25, x, y), 50, 100, "Main menu",
+        self.objects.append(gui.Label((self.center - 50, self.top - 60), 50, 100, f'{self.side} is winner!', self,
+                                      {'color': (0, 0, 0), 'bd_color': (255, 255, 255), 'bd_width': -1}))
+
+        self.objects.append(gui.Button((self.center - 100 - 2, self.top - 5, x, y), 50, 100, "Main menu",
                                        lambda: self.scene_manager.new_scene(
                                            MainMenu(self.scene_manager.display, self.scene_manager)), self,
                                        {'color': (0, 0, 0), 'bd_color': (255, 255, 255), 'bd_width': -1},
                                        {'color': (40, 40, 40), 'bd_color': (255, 255, 255), 'bd_width': 1}))
 
-        self.objects.append(gui.Button((self.center + 2, self.top - 25, x, y), 50, 100, "Return",
+        self.objects.append(gui.Button((self.center + 2, self.top - 5, x, y), 50, 100, "Return",
                                        lambda: self.scene_manager.new_scene(
                                            MainGame(self.scene_manager.display, self.scene_manager)), self,
                                        {'color': (0, 0, 0), 'bd_color': (255, 255, 255), 'bd_width': -1},
@@ -188,13 +188,7 @@ class MainGame(Scene):
                       {'color': (214, 123, 45), 'bd_color': (255, 255, 255), 'bd_width': -1}, 'left', 'size'))
 
     def __player_win(self, char):
-        _scene = MainGame(self._display, self.scene_manager)
-        if char == 'x':
-            _scene.add_obj(game_objects.Cross((450, 450), 20))
-        elif char == 'o':
-            _scene.add_obj(game_objects.Circle((450, 450), 20))
-
-        self.scene_manager.new_scene(_scene)
+        self.scene_manager.new_scene(EndGame(pygame.Surface((300, 120)), self.scene_manager, char), True, (1, 130))
 
     def __change_size(self):
         self._variables['player'] = 'x' if self._variables['player'] == 'y' else 'y'

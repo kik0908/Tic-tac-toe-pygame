@@ -187,9 +187,9 @@ class TicTacToeGrid(Grid):
             ans_x[1].append(self.grid[self.cells_count[0] - i - 1][i].value == 'x')
             ans_o[1].append(self.grid[self.cells_count[0] - i - 1][i].value == 'o')
         if any(map(lambda x: all(x), ans_x)):
-            return 'x'
+            return 'X'
         elif any(map(lambda x: all(x), ans_o)):
-            return 'o'
+            return 'O'
 
         ans_x = []
         ans_o = []
@@ -197,9 +197,9 @@ class TicTacToeGrid(Grid):
             ans_x.append(all(map(lambda x: x.value == 'x', i)))
             ans_o.append(all(map(lambda x: x.value == 'o', i)))
         if any(ans_x):
-            return 'x'
+            return 'X'
         elif any(ans_o):
-            return 'o'
+            return 'O'
 
         ans_x = []
         ans_o = []
@@ -212,9 +212,9 @@ class TicTacToeGrid(Grid):
             ans_x.append(all(_1))
             ans_o.append(all(_2))
         if any(ans_x):
-            return 'x'
+            return 'X'
         elif any(ans_o):
-            return 'o'
+            return 'O'
 
         _c = 0
         for i in self.grid:
@@ -222,7 +222,7 @@ class TicTacToeGrid(Grid):
                 if j != GameUnit():
                     _c += 1
         if _c == self.cells_count[0] * self.cells_count[1]:
-            return 'b'
+            return 'Nobody'
 
     @property
     def char(self):

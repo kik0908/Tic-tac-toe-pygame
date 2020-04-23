@@ -1,6 +1,6 @@
 import pygame
 
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Optional
 
 
 class BaseGUIObject:
@@ -36,7 +36,7 @@ class Label(BaseGUIObject):
         self.rect_style = passive_state
         self.align = align
 
-        self.offset =  pos[2:] if len(pos) == 4 else [0, 0]
+        self.offset = pos[2:] if len(pos) == 4 else [0, 0]
 
         if type(text) == str:
             self.text = {'text': text, 'size': 20, 'color': (255, 255, 255)}
@@ -47,7 +47,7 @@ class Label(BaseGUIObject):
         self.rect_for_check.left += self.offset[0]
         self.rect_for_check.top += self.offset[1]
 
-        self.text['font'] = text.get('font', 'arial')
+        self.text['font'] = self.text.get('font', 'arial')
         font = pygame.font.match_font(self.text['font'])
         font = pygame.font.Font(font, self.text['size'])
         self.text_surface = font.render(self.text['text'], True, self.text['color'])
@@ -85,7 +85,8 @@ class Label(BaseGUIObject):
 
 
 class Button(BaseGUIObject):
-    def __init__(self, pos: Tuple[int, int], width, height, text: Dict, func, scene, passive_state, hovered_state=None,
+    def __init__(self, pos: Tuple[int, int, Optional[int], Optional[int]], width, height, text: Dict, func, scene,
+                 passive_state, hovered_state=None,
                  pressed_state=None, name=''):
         """
         ***_state = = {'color': (int, int, int, int), 'bd_color':  (int, int, int, int), 'bd_width': 1}
