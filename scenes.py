@@ -158,6 +158,7 @@ class EndGame(Scene):
                                        {'color': (40, 40, 40), 'bd_color': (255, 255, 255), 'bd_width': 1}))
 
     def render(self):
+        self.display.set_alpha(245)
         self.display.fill((128, 128, 128))
         for obj in self.objects:
             obj.render(self.display)

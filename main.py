@@ -1,18 +1,10 @@
 import pygame
 
 import scenes
-from game_objects import Cross, Circle, Grid, TicTacToeGrid
-from gui import Button, Label, TextInput
 
 WIDTH = 302
 HEIGHT = 357
 FPS = 60
-
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
 
 pygame.init()
 pygame.mixer.init()
@@ -22,33 +14,17 @@ clock = pygame.time.Clock()
 
 font_name = pygame.font.match_font('arial')
 
-
-def draw_text(surf, text, size, x, y):
-    font = pygame.font.Font(font_name, size)
-    text_surface = font.render(text, True, GREEN)
-    text_rect = text_surface.get_rect()
-    text_rect.midtop = (x, y)
-    text_rect.center = (x, y)
-    surf.blit(text_surface, text_rect)
-
-
 scene_manager = scenes.SceneManager(screen)
 scene_manager.new_scene(scenes.MainMenu(screen, scene_manager))
-
-te = TextInput((100, 200), 30, 100, scene_manager.scene,
-               {'color': (123, 18, 76), 'bd_color': (255, 255, 255), 'bd_width': 1})
 
 running = True
 while running:
     clock.tick(FPS)
-    screen.fill(BLACK)
+    screen.fill((0, 0, 0))
 
-    aa = pygame.event.get()
-    scene_manager.next_step(aa)
+    events = pygame.event.get()
+    scene_manager.next_step(events)
 
-    for i in aa:
-        te.check_event(i)
-    te.render(screen)
     pygame.display.flip()
 
 pygame.quit()
